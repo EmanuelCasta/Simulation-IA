@@ -1,0 +1,396 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema scraping
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema scraping
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `scraping` DEFAULT CHARACTER SET utf8 ;
+USE `scraping` ;
+
+-- -----------------------------------------------------
+-- Table `scraping`.`revista`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`revista` (
+  `idRevista` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `Q` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idRevista`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`articulo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`articulo` (
+  `idArticulo` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `Fecha` VARCHAR(45) NOT NULL,
+  `Link_Descarga` VARCHAR(45) NOT NULL,
+  `idRevista` INT NOT NULL,
+  `authors` VARCHAR(45) NOT NULL,
+  `pagestart` VARCHAR(45) NULL DEFAULT NULL,
+  `pageend` VARCHAR(45) NULL DEFAULT NULL,
+  `doi` VARCHAR(45) NULL DEFAULT NULL,
+  `resumen` VARCHAR(45) NULL DEFAULT NULL,
+  `llaves` VARCHAR(45) NULL DEFAULT NULL,
+  `volume` VARCHAR(45) NULL,
+  `issue` VARCHAR(45) NULL,
+  PRIMARY KEY (`idArticulo`),
+  UNIQUE INDEX `Nombre_UNIQUE` (`nombre` ASC) VISIBLE,
+  INDEX `fk_revista_idx` (`idRevista` ASC) VISIBLE,
+  CONSTRAINT `fk_revista`
+    FOREIGN KEY (`idRevista`)
+    REFERENCES `scraping`.`revista` (`idRevista`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`subarea`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`subarea` (
+  `idSubArea` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idSubArea`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`articuloarea`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`articuloarea` (
+  `idArticuloArea` INT NOT NULL AUTO_INCREMENT,
+  `idSubArea` INT NOT NULL,
+  `idArticulo` INT NOT NULL,
+  PRIMARY KEY (`idArticuloArea`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idSubArea` ASC, `idArticulo` ASC) VISIBLE,
+  INDEX `fk_SUB_idx` (`idSubArea` ASC) VISIBLE,
+  INDEX `fk_articulo_idx` (`idArticulo` ASC) VISIBLE,
+  CONSTRAINT `fk_articulosub`
+    FOREIGN KEY (`idArticulo`)
+    REFERENCES `scraping`.`articulo` (`idArticulo`),
+  CONSTRAINT `fk_SUBarticulo`
+    FOREIGN KEY (`idSubArea`)
+    REFERENCES `scraping`.`subarea` (`idSubArea`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`basesdedatos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`basesdedatos` (
+  `idBasesDeDatos` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  `link` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idBasesDeDatos`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`baserevista`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`baserevista` (
+  `idBaseRevista` INT NOT NULL AUTO_INCREMENT,
+  `idBasesDeDatos` INT NOT NULL,
+  `idRevista` INT NOT NULL,
+  PRIMARY KEY (`idBaseRevista`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idBasesDeDatos` ASC, `idRevista` ASC) VISIBLE,
+  INDEX `fk_revista_idx` (`idRevista` ASC) VISIBLE,
+  INDEX `fk_bases_idx` (`idBasesDeDatos` ASC) VISIBLE,
+  CONSTRAINT `fk_basesrevista`
+    FOREIGN KEY (`idBasesDeDatos`)
+    REFERENCES `scraping`.`basesdedatos` (`idBasesDeDatos`),
+  CONSTRAINT `fk_revistabases`
+    FOREIGN KEY (`idRevista`)
+    REFERENCES `scraping`.`revista` (`idRevista`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`operadorlogico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`operadorlogico` (
+  `idOperadorLogico` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idOperadorLogico`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`palabracomplementaria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`palabracomplementaria` (
+  `idPalabraComplementaria` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idPalabraComplementaria`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`logicocomplementaria`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`logicocomplementaria` (
+  `idLogicoComplementaria` INT NOT NULL AUTO_INCREMENT,
+  `idPalabraComplementaria` INT NOT NULL,
+  `idOperadorLogico` INT NOT NULL,
+  PRIMARY KEY (`idLogicoComplementaria`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idOperadorLogico` ASC, `idPalabraComplementaria` ASC) VISIBLE,
+  INDEX `fk_operadorComple_idx` (`idOperadorLogico` ASC) VISIBLE,
+  INDEX `fk_palabraComplementaroa_idx` (`idPalabraComplementaria` ASC) VISIBLE,
+  CONSTRAINT `fk_operadorComple`
+    FOREIGN KEY (`idOperadorLogico`)
+    REFERENCES `scraping`.`operadorlogico` (`idOperadorLogico`),
+  CONSTRAINT `fk_palabraComplementaroa`
+    FOREIGN KEY (`idPalabraComplementaria`)
+    REFERENCES `scraping`.`palabracomplementaria` (`idPalabraComplementaria`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`palabraclave`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`palabraclave` (
+  `idPalabraClave` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idPalabraClave`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`logicoclave`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`logicoclave` (
+  `idLogicoClave` INT NOT NULL AUTO_INCREMENT,
+  `idOperadorLogico` INT NOT NULL,
+  `idPalabraClave` INT NOT NULL,
+  PRIMARY KEY (`idLogicoClave`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idOperadorLogico` ASC, `idPalabraClave` ASC) VISIBLE,
+  INDEX `fk_operadorClave_idx` (`idOperadorLogico` ASC) VISIBLE,
+  INDEX `df_palabraclave_idx` (`idPalabraClave` ASC) VISIBLE,
+  CONSTRAINT `df_palabraclave`
+    FOREIGN KEY (`idPalabraClave`)
+    REFERENCES `scraping`.`palabraclave` (`idPalabraClave`),
+  CONSTRAINT `fk_operadorClave`
+    FOREIGN KEY (`idOperadorLogico`)
+    REFERENCES `scraping`.`operadorlogico` (`idOperadorLogico`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`palabracaracteristica`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`palabracaracteristica` (
+  `idPalabraCaracteristica` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idPalabraCaracteristica`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`logicocaracteristica`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`logicocaracteristica` (
+  `idLogicoCaracteristica` INT NOT NULL AUTO_INCREMENT,
+  `idOperadorLogico` INT NOT NULL,
+  `idPalabraCaracteristica` INT NOT NULL,
+  PRIMARY KEY (`idLogicoCaracteristica`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idOperadorLogico` ASC, `idPalabraCaracteristica` ASC) VISIBLE,
+  INDEX `fk_logicocara_idx` (`idOperadorLogico` ASC) VISIBLE,
+  INDEX `fk_palabracara_idx` (`idPalabraCaracteristica` ASC) VISIBLE,
+  CONSTRAINT `fk_logicocara`
+    FOREIGN KEY (`idOperadorLogico`)
+    REFERENCES `scraping`.`operadorlogico` (`idOperadorLogico`),
+  CONSTRAINT `fk_palabracara`
+    FOREIGN KEY (`idPalabraCaracteristica`)
+    REFERENCES `scraping`.`palabracaracteristica` (`idPalabraCaracteristica`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`busqueda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`busqueda` (
+  `idBusqueda` INT NOT NULL AUTO_INCREMENT,
+  `idLogicoClave` INT NOT NULL,
+  `idLogicoCaracteristica` INT NOT NULL,
+  `idLogicoComplementaria` INT NOT NULL,
+  PRIMARY KEY (`idBusqueda`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idLogicoClave` ASC, `idLogicoCaracteristica` ASC, `idLogicoComplementaria` ASC) VISIBLE,
+  INDEX `fk_busquelogicoclvae_idx` (`idLogicoClave` ASC) VISIBLE,
+  INDEX `fk_busquedalogicocomple_idx` (`idLogicoComplementaria` ASC) VISIBLE,
+  INDEX `fk_busuqedacaracteristica_idx` (`idLogicoCaracteristica` ASC) VISIBLE,
+  CONSTRAINT `fk_busquedalogicocomple`
+    FOREIGN KEY (`idLogicoComplementaria`)
+    REFERENCES `scraping`.`logicocomplementaria` (`idLogicoComplementaria`),
+  CONSTRAINT `fk_busquelogicoclvae`
+    FOREIGN KEY (`idLogicoClave`)
+    REFERENCES `scraping`.`logicoclave` (`idLogicoClave`),
+  CONSTRAINT `fk_busuqedacaracteristica`
+    FOREIGN KEY (`idLogicoCaracteristica`)
+    REFERENCES `scraping`.`logicocaracteristica` (`idLogicoCaracteristica`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`basesdatosbusqueda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`basesdatosbusqueda` (
+  `idBasesDatosBusqueda` INT NOT NULL AUTO_INCREMENT,
+  `idBasesDeDatos` INT NULL DEFAULT NULL,
+  `idBusqueda` INT NULL DEFAULT NULL,
+  `numeroArticulos` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idBasesDatosBusqueda`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idBasesDeDatos` ASC, `idBusqueda` ASC) VISIBLE,
+  INDEX `FK_BASESBUSQUEDA1_idx` (`idBasesDeDatos` ASC) VISIBLE,
+  INDEX `FK_basesbiuqeyda2_idx` (`idBusqueda` ASC) VISIBLE,
+  CONSTRAINT `FK_basesbiuqeyda2`
+    FOREIGN KEY (`idBusqueda`)
+    REFERENCES `scraping`.`busqueda` (`idBusqueda`),
+  CONSTRAINT `FK_BASESBUSQUEDA1`
+    FOREIGN KEY (`idBasesDeDatos`)
+    REFERENCES `scraping`.`basesdedatos` (`idBasesDeDatos`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`busquedaarticulo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`busquedaarticulo` (
+  `idBusquedaArticulo` INT NOT NULL AUTO_INCREMENT,
+  `idBusqueda` INT NOT NULL,
+  `idArticulo` INT NOT NULL,
+  PRIMARY KEY (`idBusquedaArticulo`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idBusqueda` ASC, `idArticulo` ASC) VISIBLE,
+  INDEX `fk_articulo_idx` (`idArticulo` ASC) VISIBLE,
+  INDEX `fk_busquedaarticulo_idx` (`idBusqueda` ASC) VISIBLE,
+  CONSTRAINT `fk_articulo`
+    FOREIGN KEY (`idArticulo`)
+    REFERENCES `scraping`.`articulo` (`idArticulo`),
+  CONSTRAINT `fk_busquedaarticulo`
+    FOREIGN KEY (`idBusqueda`)
+    REFERENCES `scraping`.`busqueda` (`idBusqueda`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`palabracondicional`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`palabracondicional` (
+  `idPalabraCondicional` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idPalabraCondicional`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`logicocondicional`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`logicocondicional` (
+  `idOperadorLogico` INT NOT NULL,
+  `idLogicoCondicional` INT NOT NULL AUTO_INCREMENT,
+  `idPalabraCondicional` INT NOT NULL,
+  PRIMARY KEY (`idLogicoCondicional`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idOperadorLogico` ASC, `idPalabraCondicional` ASC) VISIBLE,
+  INDEX `fk_OperadorLogico_idx` (`idOperadorLogico` ASC) VISIBLE,
+  INDEX `fk_condicionalPalabra_idx` (`idPalabraCondicional` ASC) VISIBLE,
+  CONSTRAINT `fk_condicionalPalabra`
+    FOREIGN KEY (`idPalabraCondicional`)
+    REFERENCES `scraping`.`palabracondicional` (`idPalabraCondicional`),
+  CONSTRAINT `fk_OperadorLogico`
+    FOREIGN KEY (`idOperadorLogico`)
+    REFERENCES `scraping`.`operadorlogico` (`idOperadorLogico`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`condicionalbusqueda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`condicionalbusqueda` (
+  `idCondicionalBusqueda` INT NOT NULL AUTO_INCREMENT,
+  `idLogicoCondicional` INT NOT NULL,
+  `idBusqueda` INT NOT NULL,
+  PRIMARY KEY (`idCondicionalBusqueda`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idBusqueda` ASC, `idLogicoCondicional` ASC) VISIBLE,
+  INDEX `fk_condicional_idx` (`idLogicoCondicional` ASC) VISIBLE,
+  INDEX `fk_busquedacondicional_idx` (`idBusqueda` ASC) VISIBLE,
+  CONSTRAINT `fk_busquedacondicional`
+    FOREIGN KEY (`idBusqueda`)
+    REFERENCES `scraping`.`busqueda` (`idBusqueda`),
+  CONSTRAINT `fk_condicional`
+    FOREIGN KEY (`idLogicoCondicional`)
+    REFERENCES `scraping`.`logicocondicional` (`idLogicoCondicional`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`tipoarticulo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`tipoarticulo` (
+  `idTipoArticulo` INT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idTipoArticulo`),
+  UNIQUE INDEX `nombre_UNIQUE` (`nombre` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `scraping`.`tipo_articulo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `scraping`.`tipo_articulo` (
+  `idTipo_Articulo` INT NOT NULL,
+  `idTipoArticulo` INT NOT NULL,
+  `idArticulo` INT NOT NULL,
+  PRIMARY KEY (`idTipo_Articulo`),
+  UNIQUE INDEX `idlogicocalogi_UNIQUE` (`idTipoArticulo` ASC, `idArticulo` ASC) VISIBLE,
+  INDEX `fk_tipo_idx` (`idTipoArticulo` ASC) VISIBLE,
+  INDEX `fk_articulo_idx` (`idArticulo` ASC) VISIBLE,
+  CONSTRAINT `fk_articulotip`
+    FOREIGN KEY (`idArticulo`)
+    REFERENCES `scraping`.`articulo` (`idArticulo`),
+  CONSTRAINT `fk_tipoarticulo`
+    FOREIGN KEY (`idTipoArticulo`)
+    REFERENCES `scraping`.`tipoarticulo` (`idTipoArticulo`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
