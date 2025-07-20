@@ -11,7 +11,7 @@ CREATE TABLE articulo (
     nombre VARCHAR(255) NOT NULL UNIQUE,
     Fecha VARCHAR(45) NOT NULL,
     Link_Descarga VARCHAR(255) NOT NULL,
-    idRevista INTEGER NOT NULL REFERENCES revista(idRevista),
+    idRevista INTEGER NOT NULL REFERENCES revista(idRevista) ON DELETE CASCADE,
     authors VARCHAR(255) NOT NULL,
     pagestart VARCHAR(45),
     pageend VARCHAR(45),
@@ -40,8 +40,8 @@ CREATE TABLE palabracomplementaria (
 
 CREATE TABLE logicocomplementaria (
     idLogicoComplementaria SERIAL PRIMARY KEY,
-    idPalabraComplementaria INTEGER NOT NULL REFERENCES palabracomplementaria(idPalabraComplementaria),
-    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico)
+    idPalabraComplementaria INTEGER NOT NULL REFERENCES palabracomplementaria(idPalabraComplementaria) ON DELETE CASCADE,
+    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico) ON DELETE CASCADE
 );
 
 CREATE TABLE palabraclave (
@@ -51,8 +51,8 @@ CREATE TABLE palabraclave (
 
 CREATE TABLE logicoclave (
     idLogicoClave SERIAL PRIMARY KEY,
-    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico),
-    idPalabraClave INTEGER NOT NULL REFERENCES palabraclave(idPalabraClave)
+    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico) ON DELETE CASCADE,
+    idPalabraClave INTEGER NOT NULL REFERENCES palabraclave(idPalabraClave) ON DELETE CASCADE
 );
 
 CREATE TABLE palabracaracteristica (
@@ -62,8 +62,9 @@ CREATE TABLE palabracaracteristica (
 
 CREATE TABLE logicocaracteristica (
     idLogicoCaracteristica SERIAL PRIMARY KEY,
-    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico),
-    idPalabraCaracteristica INTEGER NOT NULL REFERENCES palabracaracteristica(idPalabraCaracteristica)
+    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico) ON DELETE CASCADE,
+    idPalabraCaracteristica INTEGER NOT NULL REFERENCES palabracaracteristica(idPalabraCaracteristica) ON DELETE CASCADE
+
 );
 
 CREATE TABLE palabracondicional (
@@ -73,26 +74,28 @@ CREATE TABLE palabracondicional (
 
 CREATE TABLE logicocondicional (
     idLogicoCondicional SERIAL PRIMARY KEY,
-    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico),
-    idPalabraCondicional INTEGER NOT NULL REFERENCES palabracondicional(idPalabraCondicional)
+    idOperadorLogico INTEGER NOT NULL REFERENCES operadorlogico(idOperadorLogico) ON DELETE CASCADE,
+    idPalabraCondicional INTEGER NOT NULL REFERENCES palabracondicional(idPalabraCondicional) ON DELETE CASCADE
+
 );
 
 CREATE TABLE busqueda (
     idBusqueda SERIAL PRIMARY KEY,
-    idLogicoClave INTEGER NOT NULL REFERENCES logicoclave(idLogicoClave),
-    idLogicoCaracteristica INTEGER NOT NULL REFERENCES logicocaracteristica(idLogicoCaracteristica),
-    idLogicoComplementaria INTEGER NOT NULL REFERENCES logicocomplementaria(idLogicoComplementaria)
+    idLogicoClave INTEGER NOT NULL REFERENCES logicoclave(idLogicoClave) ON DELETE CASCADE,
+    idLogicoCaracteristica INTEGER NOT NULL REFERENCES logicocaracteristica(idLogicoCaracteristica) ON DELETE CASCADE,
+    idLogicoComplementaria INTEGER NOT NULL REFERENCES logicocomplementaria(idLogicoComplementaria) ON DELETE CASCADE
+
 );
 
 CREATE TABLE basesdatosbusqueda (
     idBasesDatosBusqueda SERIAL PRIMARY KEY,
-    idBasesDeDatos INTEGER REFERENCES basesdedatos(idBasesDeDatos),
-    idBusqueda INTEGER REFERENCES busqueda(idBusqueda),
+    idBasesDeDatos INTEGER REFERENCES basesdedatos(idBasesDeDatos) ON DELETE CASCADE,
+    idBusqueda INTEGER REFERENCES busqueda(idBusqueda) ON DELETE CASCADE,
     numeroArticulos INTEGER
 );
 
 CREATE TABLE busquedaarticulo (
     idBusquedaArticulo SERIAL PRIMARY KEY,
-    idBusqueda INTEGER NOT NULL REFERENCES busqueda(idBusqueda),
-    idArticulo INTEGER NOT NULL REFERENCES articulo(idArticulo)
+    idBusqueda INTEGER NOT NULL REFERENCES busqueda(idBusqueda) ON DELETE CASCADE,
+    idArticulo INTEGER NOT NULL REFERENCES articulo(idArticulo) ON DELETE CASCADE
 );
