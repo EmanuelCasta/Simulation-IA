@@ -1,14 +1,17 @@
 import __init__
-from MySQLdb import _mysql
+import psycopg2
 from dotenv import load_dotenv
-import sys
-#sys.path.insert(0, '../')
 from redirect import redirect
 
-class ConnectionDB():
+class ConnectionDB:
     def __init__(self):
         load_dotenv()
-        self.data =redirect()
-    
+        self.data = redirect()
+
     def connect(self):
-        return _mysql.connect(self.data.host, self.data.user,self.data.passw,self.data.names)
+        return psycopg2.connect(
+            host=self.data.host,
+            user=self.data.user,
+            password=self.data.passw,
+            dbname=self.data.names
+        )
