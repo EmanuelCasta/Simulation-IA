@@ -7,6 +7,16 @@ class DataBasePalabras():
         self.db = ConnectionDB()
         self.name =name
 
+    def run_query(self, query, fetch=False):
+        conn = self.db.connect()
+        cur = conn.cursor()
+        cur.execute(query)
+        data = cur.fetchall() if fetch else None
+        conn.commit()
+        cur.close()
+        conn.close()
+        return data
+
     def insert_palabra(self,nombre):
         pass
 
@@ -18,50 +28,49 @@ class Busqueda(DataBasePalabras):
         DataBasePalabras.__init__(self,"busqueda")
     
     def insert_palabra(self,nombre="busqueda"):
-        process = self.db.connect()
-        try: 
-            process.query(f"""insert into busqueda (idLogicoCaracteristica, idLogicoClave, idLogicoComplementaria) select  idLogicoCaracteristica, idLogicoClave, idLogicoComplementaria from logicocaracteristica inner join logicoclave inner join logicocomplementaria;""")
-            process.query(f"""insert into basesdatosbusqueda (idBasesDeDatos,idBusqueda,numeroArticulos) select idBasesDeDatos,idBusqueda, null as numeroArticulos from basesdedatos natural inner join busqueda;""")
+        try:
+            self.run_query(
+                """insert into busqueda (idLogicoCaracteristica, idLogicoClave, idLogicoComplementaria)
+                   select idLogicoCaracteristica, idLogicoClave, idLogicoComplementaria
+                   from logicocaracteristica
+                   inner join logicoclave
+                   inner join logicocomplementaria;"""
+            )
+            self.run_query(
+                """insert into basesdatosbusqueda (idBasesDeDatos,idBusqueda,numeroArticulos)
+                   select idBasesDeDatos,idBusqueda, null as numeroArticulos
+                   from basesdedatos natural inner join busqueda;"""
+            )
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM busqueda""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM busqueda", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class dbBases(DataBasePalabras):
     def __init__(self):
         DataBasePalabras.__init__(self,"db")
     
     def insert_palabra(self,nombre,link):
-        process = self.db.connect()
-        try: 
-            process.query(f"""
-            INSERT INTO basesdedatos (nombre, link) VALUES ('{nombre}', '{link}');
-            """)
+        try:
+            self.run_query(
+                f"INSERT INTO basesdedatos (nombre, link) VALUES ('{nombre}', '{link}');"
+            )
         except Exception:
-
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM basesdedatos""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM basesdedatos", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class LogicoCaracteristicas(DataBasePalabras):
 
@@ -69,23 +78,23 @@ class LogicoCaracteristicas(DataBasePalabras):
         DataBasePalabras.__init__(self,"logicocaracteristica")
     
     def insert_palabra(self,nombre="logicocaracteristica"):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO logicocaracteristica (idOperadorLogico, idPalabraCaracteristica) select idOperadorLogico,idPalabraCaracteristica  FROM scraping.palabracaracteristica as os inner join scraping.operadorlogico; ;""")
+        try:
+            self.run_query(
+                """INSERT INTO logicocaracteristica (idOperadorLogico, idPalabraCaracteristica)
+                   SELECT idOperadorLogico,idPalabraCaracteristica
+                   FROM scraping.palabracaracteristica AS os
+                   INNER JOIN scraping.operadorlogico;"""
+            )
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM logicocaracteristica""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM logicocaracteristica", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class LogicoCondicional(DataBasePalabras):
 
@@ -93,23 +102,23 @@ class LogicoCondicional(DataBasePalabras):
         DataBasePalabras.__init__(self,"logicocondicional")
     
     def insert_palabra(self,nombre="logicocondicional"):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO logicocondicional (idOperadorLogico,idPalabraCondicional)  select idOperadorLogico,idPalabraCondicional  FROM scraping.palabracondicional inner join scraping.operadorlogico; """)
+        try:
+            self.run_query(
+                """INSERT INTO logicocondicional (idOperadorLogico,idPalabraCondicional)
+                   SELECT idOperadorLogico,idPalabraCondicional
+                   FROM scraping.palabracondicional
+                   INNER JOIN scraping.operadorlogico;"""
+            )
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM logicocondicional""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM logicocondicional", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class LogicoClave(DataBasePalabras):
 
@@ -117,23 +126,23 @@ class LogicoClave(DataBasePalabras):
         DataBasePalabras.__init__(self,"logicoclave")
     
     def insert_palabra(self,nombre="logicoclave"):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO logicoclave (idOperadorLogico,idPalabraClave) select idOperadorLogico,idPalabraClave  FROM scraping.palabraclave inner join scraping.operadorlogico;""")
+        try:
+            self.run_query(
+                """INSERT INTO logicoclave (idOperadorLogico,idPalabraClave)
+                   SELECT idOperadorLogico,idPalabraClave
+                   FROM scraping.palabraclave
+                   INNER JOIN scraping.operadorlogico;"""
+            )
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM logicoclave""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM logicoclave", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class LogicoComplementaria(DataBasePalabras):
 
@@ -141,46 +150,41 @@ class LogicoComplementaria(DataBasePalabras):
         DataBasePalabras.__init__(self,"logicocomplementaria")
     
     def insert_palabra(self,nombre='logicocomplementaria'):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO logicocomplementaria (idOperadorLogico,idPalabraComplementaria)  select idOperadorLogico,idPalabraComplementaria  FROM scraping.palabracomplementaria inner join scraping.operadorlogico; """)
+        try:
+            self.run_query(
+                """INSERT INTO logicocomplementaria (idOperadorLogico,idPalabraComplementaria)
+                   SELECT idOperadorLogico,idPalabraComplementaria
+                   FROM scraping.palabracomplementaria
+                   INNER JOIN scraping.operadorlogico;"""
+            )
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM logicocomplementaria""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM logicocomplementaria", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class Palabraclave(DataBasePalabras):
     def __init__(self):
         DataBasePalabras.__init__(self,"word_key")
 
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO palabraclave (nombre) VALUES ({nombre})""")
+        try:
+            self.run_query(f"INSERT INTO palabraclave (nombre) VALUES ({nombre})")
         except Exception:
             print(f"[ERROR] Same {nombre} ,{self.name}")
-        process.close()
 
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM palabraclave""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM palabraclave", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class Palabracaracteristica(DataBasePalabras):
 
@@ -188,68 +192,52 @@ class Palabracaracteristica(DataBasePalabras):
         DataBasePalabras.__init__(self,"word_features")
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM palabracaracteristica""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM palabracaracteristica", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name} ,{self.name}")
-        process.close()
+            return []
 
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO palabracaracteristica (nombre) VALUES ({nombre});""")
+        try:
+            self.run_query(f"INSERT INTO palabracaracteristica (nombre) VALUES ({nombre});")
         except Exception:
             print(f"[ADERROR] Same {nombre}")
-        process.close()
 
 class Palabracomplementaria(DataBasePalabras):
     def __init__(self):
             DataBasePalabras.__init__(self,"word_complementary")
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM palabracomplementaria""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM palabracomplementaria", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
     
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO palabracomplementaria (nombre) VALUES ({nombre})""")
+        try:
+            self.run_query(f"INSERT INTO palabracomplementaria (nombre) VALUES ({nombre})")
         except Exception:
             print(f"[ERROR] Same {nombre}  ,{self.name}")
-        process.close()
 
 class Palabracondicional(DataBasePalabras):
     def __init__(self):
         DataBasePalabras.__init__(self,"word_no_necessary")
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM palabracondicional""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM palabracondicional", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
     
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO palabracondicional (nombre) VALUES ({nombre})""")
+        try:
+            self.run_query(f"INSERT INTO palabracondicional (nombre) VALUES ({nombre})")
         except Exception:
-            
             print(f"[ERROR] Same {nombre}  ,{self.name}")
-        process.close()
 
 class Palabralogica(DataBasePalabras):
 
@@ -257,22 +245,17 @@ class Palabralogica(DataBasePalabras):
         DataBasePalabras.__init__(self,"logic")
 
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO operadorlogico (nombre) VALUES ({nombre});""")
+        try:
+            self.run_query(f"INSERT INTO operadorlogico (nombre) VALUES ({nombre});")
         except Exception:
             print(f"[ERROR] Same {nombre}  ,{self.name}")
-        process.close()
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM scraping.operadorlogico order by idOperadorLogico asc""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM scraping.operadorlogico order by idOperadorLogico asc", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class Revista(DataBasePalabras):
 
@@ -280,85 +263,71 @@ class Revista(DataBasePalabras):
         DataBasePalabras.__init__(self,"revista")
 
     def insert_palabra(self,nombre):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO revista (nombre, Q) VALUES ('{nombre}', '');""")
+        try:
+            self.run_query(f"INSERT INTO revista (nombre, Q) VALUES ('{nombre}', '');")
         except Exception:
             print(f"[ERROR] Same {nombre}  ,{self.name}")
-        process.close()
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""SELECT * FROM revista""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("SELECT * FROM revista", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class Articulo(DataBasePalabras):
     def __init__(self):
         DataBasePalabras.__init__(self,"articulo")
 
     def insert_palabra(self,nombres):
-        process = self.db.connect()
-        try: 
-       
-            process.query(f"""INSERT INTO articulo ( nombre, Fecha, Link_Descarga, idRevista, authors, pagestart, pageend, doi, resumen, llaves, volume, issue) VALUES ( "{nombres['Title']}", "{nombres['Year']}", "{nombres['Link']}", {nombres['Source title']}, "{nombres['Authors']}","{nombres['Page start']}", "{nombres['Page end']}", "{nombres['DOI']}", "{nombres['Abstract']}", "{nombres['Author Keywords']}", "{nombres['Volume']}", '{nombres['Issue']}');""")
-        except Exception:
-            print(f"[ERROR] Same  {nombres['Title'],self.name}")
-        process.close()
-        process = self.db.connect()
         try:
-            process.query(f"""SELECT idArticulo FROM articulo where nombre="{nombres['Title']}"; """)
-            return process.use_result().fetch_row(maxrows=0,how=1)#[0]['idArticulo'].decode(encoding="utf-8")
-        except:
+            self.run_query(
+                f"""INSERT INTO articulo (nombre, Fecha, Link_Descarga, idRevista, authors, pagestart, pageend, doi, resumen, llaves, volume, issue)
+                VALUES ( '{nombres['Title']}', '{nombres['Year']}', '{nombres['Link']}', {nombres['Source title']}, '{nombres['Authors']}', '{nombres['Page start']}', '{nombres['Page end']}', '{nombres['DOI']}', '{nombres['Abstract']}', '{nombres['Author Keywords']}', '{nombres['Volume']}', '{nombres['Issue']}');"""
+            )
+            result = self.run_query(
+                f"SELECT idArticulo FROM articulo where nombre='{nombres['Title']}';",
+                fetch=True
+            )
+            return result
+        except Exception:
+            print(f"[ERROR] Same  {(nombres['Title'], self.name)}")
             return ()
         
 
     def get_caracteristics(self,pather):
         word ="""SELECT max(idArticulo) as max FROM articulo;"""
-        process = self.db.connect()
-        try: 
-            process.query(word)
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query(word, fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""select * from articulo""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("select * from articulo", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 class BusquedaArticlo(DataBasePalabras):
     def __init__(self):
         DataBasePalabras.__init__(self,"buarticulo")
 
     def insert_palabra(self,nombres):
-        process = self.db.connect()
-        try: 
-            process.query(f"""INSERT INTO busquedaarticulo (idBusqueda, idArticulo) VALUES ('{nombres['idBusqueda']}', '{nombres['idArticulo']}');""")
+        try:
+            self.run_query(
+                f"INSERT INTO busquedaarticulo (idBusqueda, idArticulo) VALUES ('{nombres['idBusqueda']}', '{nombres['idArticulo']}');"
+            )
         except Exception:
             print(f"[ERROR] Same  {self.name}")
-        process.close()
 
     def get_palabra(self):
-        process = self.db.connect()
-        try: 
-            process.query("""select * from busquedaarticulo""")
-            return process.use_result().fetch_row(maxrows=0,how=1)
-           
+        try:
+            return self.run_query("select * from busquedaarticulo", fetch=True)
         except Exception:
             print(f"[ERROR] {self.name}")
-        process.close()
+            return []
 
 
 
